@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block title %}Мої тести{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h2 class="mb-0">Мої тести</h2>
+  <a class="btn btn-primary" href="{{ url_for('teacher.new_test') }}">Створити тест</a>
+</div>
+{% if tests %}
+<div class="table-responsive">
+  <table class="table table-hover align-middle">
+    <thead>
+      <tr><th>Назва</th><th>Питань</th><th>Час, хв</th><th>Спроб</th><th></th></tr>
+    </thead>
+    <tbody>
+      {% for t in tests %}
+      <tr>
+        <td><a href="{{ url_for('teacher.test_detail', test_id=t.id) }}">{{ t.title }}</a></td>
+        <td>{{ t.questions|length }}</td>
+        <td>{{ t.time_limit_min or '—' }}</td>
+        <td>{{ t.max_attempts }}</td>
+        <td class="text-end">
+          <a class="btn btn-sm btn-outline-secondary" href="{{ url_for('teacher.edit_test', test_id=t.id) }}">Редагувати</a>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% else %}
+<p class="text-muted">Ви ще не створили жодного тесту.</p>
+{% endif %}
+{% endblock %}

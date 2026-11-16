@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% block title %}{{ test.title }}{% endblock %}
+{% block content %}
+<h2>{{ test.title }}</h2>
+{% if test.description %}<p>{{ test.description }}</p>{% endif %}
+<ul class="list-unstyled text-muted">
+  <li>Кількість питань: {{ test.questions|length }}</li>
+  <li>Час: {{ (test.time_limit_min ~ ' хв') if test.time_limit_min else 'без обмеження' }}</li>
+  <li>Дозволено спроб: {{ test.max_attempts }} (використано: {{ attempts|length }})</li>
+</ul>
+
+{% if unfinished %}
+  <form method="post" action="{{ url_for('student.start', test_id=test.id) }}">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <button class="btn btn-warning">Продовжити незавершену спробу</button>
+  </form>
+{% elif can_start %}
+  <form method="post" action="{{ url_for('student.start', test_id=test.id) }}">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <button class="btn btn-primary">Почати тест</button>
+  </form>
+{% else %}
+  <div class="alert alert-secondary">Ліміт спроб вичерпано.</div>
+{% endif %}
+
+{% if attempts %}
+<h4 class="mt-4">Мої спроби</h4>
+<div class="table-responsive">
+  <table class="table align-middle">
+    <thead><tr><th>Початок</th><th>Результат</th><th></th></tr></thead>
+    <tbody>
+      {% for a in attempts %}
+      <tr>
+        <td>{{ a.started_at|localtime }}</td>
+        <td>{% if a.finished_at %}{{ a.score }} %{% else %}<span class="badge text-bg-warning">не завершено</span>{% endif %}</td>
+        <td class="text-end">
+          {% if a.finished_at %}<a class="btn btn-sm btn-outline-secondary" href="{{ url_for('student.result', attempt_id=a.id) }}">Деталі</a>{% endif %}
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endif %}
+<a href="{{ url_for('student.tests') }}">← До списку тестів</a>
+{% endblock %}

@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% from "auth/_field.html" import field %}
+{% block title %}Нове питання{% endblock %}
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-12 col-md-9 col-lg-7">
+    <h2 class="mb-1">Нове питання</h2>
+    <p class="text-muted">Тест: {{ test.title }}</p>
+    <form method="post" novalidate>
+      {{ form.hidden_tag() }}
+      {{ field(form.text) }}
+      {{ field(form.points) }}
+
+      <label class="form-label">Варіанти відповіді (заповніть щонайменше два)</label>
+      {% for i in range(1, 5) %}
+        {% set opt = form['option_' ~ i] %}
+        {% set cor = form['correct_' ~ i] %}
+        <div class="input-group mb-2">
+          <div class="input-group-text">
+            {{ cor(class="form-check-input mt-0", **{'aria-label': 'Правильна відповідь ' ~ i}) }}
+          </div>
+          {{ opt(class="form-control" + (" is-invalid" if opt.errors else ""), placeholder="Варіант " ~ i) }}
+          {% for e in opt.errors %}<div class="invalid-feedback">{{ e }}</div>{% endfor %}
+        </div>
+      {% endfor %}
+      <div class="form-text mb-3">
+        Позначте прапорцем правильну відповідь. Якщо правильних кілька, студент має обрати їх усі.
+      </div>
+      {% for e in form.options_errors %}
+        <div class="alert alert-danger py-2">{{ e }}</div>
+      {% endfor %}
+
+      {{ form.submit(class="btn btn-primary") }}
+      <a class="btn btn-link" href="{{ url_for('teacher.test_detail', test_id=test.id) }}">Скасувати</a>
+    </form>
+  </div>
+</div>
+{% endblock %}

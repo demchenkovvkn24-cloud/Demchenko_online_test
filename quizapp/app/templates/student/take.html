@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+{% block title %}{{ test.title }}{% endblock %}
+{% block content %}
+<h2 class="mb-3">{{ test.title }}</h2>
+
+{% if seconds_left is not none %}
+<div class="position-sticky top-0 py-2 bg-body" style="z-index: 10;">
+  <div class="alert alert-info mb-0">Залишилось часу: <strong id="timer"></strong></div>
+</div>
+{% endif %}
+
+<form method="post" id="quiz-form" action="{{ url_for('student.submit', attempt_id=attempt.id) }}" class="mt-3">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+  {% for q in test.questions %}
+    {% set multi = (q.options|selectattr('is_correct')|list|length) > 1 %}
+    <div class="card mb-3">
+      <div class="card-body">
+        <div class="mb-2">
+          <strong>{{ loop.index }}. {{ q.text }}</strong>
+          <span class="badge text-bg-secondary ms-2">{{ q.points }} б.</span>
+        </div>
+        {% if multi %}<div class="form-text mb-2">Оберіть усі правильні відповіді</div>{% endif %}
+        {% for o in q.options %}
+        <div class="form-check">
+          <input class="form-check-input" type="{{ 'checkbox' if multi else 'radio' }}"
+                 name="q_{{ q.id }}" id="o_{{ o.id }}" value="{{ o.id }}">
+          <label class="form-check-label" for="o_{{ o.id }}">{{ o.text }}</label>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+  {% endfor %}
+  <button class="btn btn-primary btn-lg">Завершити тест</button>
+</form>
+
+{% if seconds_left is not none %}
+<script>
+(function () {
+  var left = {{ seconds_left }};
+  var timer = document.getElementById('timer');
+  var form = document.getElementById('quiz-form');
+  function format(s) {
+    var m = Math.floor(s / 60), r = s % 60;
+    return m + ':' + (r < 10 ? '0' : '') + r;
+  }
+  function tick() {
+    timer.textContent = format(left);
+    if (left <= 0) { form.submit(); return; }
+    left--;
+    setTimeout(tick, 1000);
+  }
+  tick();
+})();
+</script>
+{% endif %}
+{% endblock %}

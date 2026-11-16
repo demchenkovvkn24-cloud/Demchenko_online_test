@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% from "auth/_field.html" import field %}
+{% block title %}{{ heading }}{% endblock %}
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-12 col-md-8 col-lg-6">
+    <h2 class="mb-3">{{ heading }}</h2>
+    <form method="post" novalidate>
+      {{ form.hidden_tag() }}
+      {{ field(form.title) }}
+      {{ field(form.description) }}
+      {{ field(form.time_limit_min) }}
+      {{ field(form.max_attempts) }}
+      {{ form.submit(class="btn btn-primary") }}
+      <a class="btn btn-link" href="{{ url_for('teacher.tests') }}">Скасувати</a>
+    </form>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+{% block title %}{{ test.title }}{% endblock %}
+{% block content %}
+<div class="d-flex flex-wrap justify-content-between align-items-start gap-2 mb-3">
+  <div>
+    <h2 class="mb-1">{{ test.title }}</h2>
+    {% if test.description %}<p class="mb-1">{{ test.description }}</p>{% endif %}
+    <small class="text-muted">
+      Час: {{ (test.time_limit_min ~ ' хв') if test.time_limit_min else 'без обмеження' }} ·
+      Спроб: {{ test.max_attempts }}
+    </small>
+  </div>
+  <div class="d-flex gap-2">
+    <a class="btn btn-outline-secondary" href="{{ url_for('teacher.edit_test', test_id=test.id) }}">Редагувати</a>
+    <form method="post" action="{{ url_for('teacher.delete_test', test_id=test.id) }}"
+          onsubmit="return confirm('Видалити тест разом з усіма питаннями?');">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <button class="btn btn-outline-danger">Видалити</button>
+    </form>
+  </div>
+</div>
+
+<div class="d-flex justify-content-between align-items-center mb-2">
+  <h4 class="mb-0">Питання ({{ test.questions|length }})</h4>
+  <a class="btn btn-primary btn-sm" href="{{ url_for('teacher.new_question', test_id=test.id) }}">Додати питання</a>
+</div>
+
+{% for q in test.questions %}
+<div class="card mb-3">
+  <div class="card-body">
+    <div class="d-flex justify-content-between gap-2">
+      <div>
+        <strong>{{ loop.index }}. {{ q.text }}</strong>
+        <span class="badge text-bg-secondary ms-2">{{ q.points }} б.</span>
+      </div>
+      <form method="post" action="{{ url_for('teacher.delete_question', question_id=q.id) }}"
+            onsubmit="return confirm('Видалити питання?');">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <button class="btn btn-sm btn-outline-danger">Видалити</button>
+      </form>
+    </div>
+    <ul class="list-group list-group-flush mt-2">
+      {% for o in q.options %}
+      <li class="list-group-item px-0">
+        {{ o.text }}
+        {% if o.is_correct %}<span class="badge text-bg-success ms-2">правильна</span>{% endif %}
+      </li>
+      {% endfor %}
+    </ul>
+  </div>
+</div>
+{% else %}
+<p class="text-muted">У тесті ще немає питань.</p>
+{% endfor %}
+<a href="{{ url_for('teacher.tests') }}">← До списку тестів</a>
+{% endblock %}
